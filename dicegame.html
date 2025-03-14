@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Dice Game</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+        }
+
+        .setup-section {
+            margin: 20px;
+            padding: 20px;
+            background: #34495e;
+            border-radius: 10px;
+        }
+
+        .player-setup {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .avatar-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input,
+        select {
+            margin-top: 10px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+
+        }
+
+        .selected-avatar {
+            border-color: #2ecc71 !important;
+        }
+
+        .game-container {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .player-card {
+            background: #34495e;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .active-player {
+            box-shadow: 0 0 20px #3498db;
+            transform: scale(1.05);
+        }
+
+        .dice-result {
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .score {
+            font-size: 24px;
+            color: #2ecc71;
+            margin: 10px;
+        }
+
+        .winner-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            animation: winner-celebrate 2s infinite;
+        }
+
+        @keyframes winner-celebrate {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .winner-message {
+            font-size: 36px;
+            color: #2ecc71;
+            margin: 20px;
+        }
+
+        .blur-background {
+            filter: blur(5px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="setup-section">
+        <h2>Choose Your Avatars</h2>
+        <div class="player-setup">
+            <div class="avatar-option">
+                <select class="avatar-select" onchange="updateAvatar(this, 0)">
+                    <option value="bear.png">Avatar 1</option>
+                    <option value="chicken.png">Avatar 2</option>
+                    <option value="panda.png">Avatar 3</option>
+                    <option value="meerkat.png">Avatar 4</option>
+                    <option value="rabbit.png">Avatar 5</option>
+                </select>
+                <br>
+                <img src="bear.png" width="80" alt="Player 1 Avatar">
+                <br>
+                <input type="text" placeholder="Player 1 Name">
+            </div>
+            <div class="avatar-option">
+                <select class="avatar-select" onchange="updateAvatar(this, 1)">
+                    <option value="chicken.png">Avatar 1</option>
+                    <option value="bear.png">Avatar 2</option>
+                    <option value="panda.png">Avatar 3</option>
+                    <option value="meerkat.png">Avatar 4</option>
+                    <option value="rabbit.png">Avatar 5</option>
+                </select>
+                <br>
+                <img src="chicken.png" width="80" alt="Player 2 Avatar">
+                <br>
+                <input type="text" placeholder="Player 2 Name">
+            </div>
+            <div class="avatar-option">
+                <select class="avatar-select" onchange="updateAvatar(this, 2)">
+                    <option value="panda.png">Avatar 1</option>
+                    <option value="bear.png">Avatar 2</option>
+                    <option value="chicken.png">Avatar 3</option>
+                    <option value="meerkat.png">Avatar 4</option>
+                    <option value="rabbit.png">Avatar 5</option>
+                </select>
+                <br>
+                <img src="panda.png" width="80" alt="Player 3 Avatar">
+                <br>
+                <input type="text" placeholder="Player 3 Name">
+            </div>
+        </div>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="game-container">
+        <div class="player-card" id="player1">
+            <h3 class="player-name">Player 1</h3>
+            <img class="avatar" width="80" alt="Avatar">
+            <div class="score">0</div>
+            <img class="dice-result" src="dice1.png" alt="Dice Result">
+            <div class="rolls-remaining">Rolls Left: 5</div>
+        </div>
+        <div class="player-card" id="player2">
+            <h3 class="player-name">Player 2</h3>
+            <img class="avatar" width="80" alt="Avatar">
+            <div class="score">0</div>
+            <img class="dice-result" src="dice1.png" alt="Dice Result">
+            <div class="rolls-remaining">Rolls Left: 5</div>
+        </div>
+        <div class="player-card" id="player3">
+            <h3 class="player-name">Player 3</h3>
+            <img class="avatar" width="80" alt="Avatar">
+            <div class="score">0</div>
+            <img class="dice-result" src="dice1.png" alt="Dice Result">
+            <div class="rolls-remaining">Rolls Left: 5</div>
+        </div>
+    </div>
+
+    <div class="winner-popup"
+        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <img class="winner-avatar" src="" alt="Winner Avatar">
+        <div class="winner-message"></div>
+        <button class="play-again-button" onclick="playAgain()">Play Again</button>
+    </div>
+
+    <audio id="rollSound" style="display: none;" src="diceSound.mp3" type="audio/mp3"></audio>
+
+    <script>
+        let currentPlayer = 0;
+        let rollsRemaining = [5, 5, 5];
+        let scores = [0, 0, 0];
+        const players = [];
+        const avatars = [
+            'bear.png',
+            'chicken.png',
+            'panda.png'
+        ];
+        function updateAvatar(selectElement, playerIndex) {
+            let selectedAvatar = selectElement.value;
+            let avatarImage = document.querySelectorAll('.avatar-option img')[playerIndex];
+            avatarImage.src = selectedAvatar;
+        }
+
+        function startGame() {
+            document.querySelector('.setup-section').style.display = 'none';
+            document.querySelector('.game-container').style.display = 'grid';
+
+            const playerElements = document.querySelectorAll('.player-card');
+            const nameInputs = document.querySelectorAll('.setup-section input[type="text"]');
+
+            playerElements.forEach((player, index) => {
+                const name = nameInputs[index].value.trim() || `Player ${index + 1}`;
+                player.querySelector('.player-name').textContent = name;
+                player.querySelector('.avatar').src = document.querySelectorAll('.avatar-option img')[index].src;
+                players.push({
+                    element: player,
+                    scoreElement: player.querySelector('.score'),
+                    diceResultElement: player.querySelector('.dice-result'),
+                    rollsElement: player.querySelector('.rolls-remaining')
+                });
+            });
+
+            currentPlayer = 0;
+            rollsRemaining = [5, 5, 5];
+            scores = [0, 0, 0];
+            activatePlayer(currentPlayer);
+        }
+
+        function activatePlayer(index) {
+            players.forEach((player, i) => {
+                player.element.classList.toggle('active-player', i === index);
+            });
+            players[index].diceResultElement.style.cursor = 'pointer';
+            players[index].diceResultElement.onclick = () => rollDice(index);
+        }
+
+        function rollDice(index) {
+            if (rollsRemaining[index] <= 0) return;
+            const diceValue = Math.floor(Math.random() * 6) + 1;
+            const currentPlayerData = players[index];
+
+            document.getElementById('rollSound').currentTime = 0;
+            document.getElementById('rollSound').play();
+
+            currentPlayerData.diceResultElement.style.transform = 'rotate(720deg)';
+            currentPlayerData.diceResultElement.style.transition = 'transform 0.5s';
+
+            setTimeout(() => {
+                currentPlayerData.diceResultElement.style.transform = '';
+                currentPlayerData.diceResultElement.style.transition = '';
+
+                scores[index] += diceValue;
+                currentPlayerData.scoreElement.textContent = scores[index];
+                currentPlayerData.diceResultElement.src = `dice${diceValue}.png`;
+
+                rollsRemaining[index]--;
+                currentPlayerData.rollsElement.textContent = `Rolls Left: ${rollsRemaining[index]}`;
+
+                if (rollsRemaining.every(r => r === 0)) {
+                    endGame();
+                } else {
+                    currentPlayer = (currentPlayer + 1) % 3;
+                    activatePlayer(currentPlayer);
+                }
+            }, 500);
+        }
+
+        function endGame() {
+            const winnerIndex = scores.indexOf(Math.max(...scores));
+            const winnerName = players[winnerIndex].element.querySelector('.player-name').textContent;
+            const winnerAvatar = players[winnerIndex].element.querySelector('.avatar').src;
+
+            document.querySelector('.game-container').classList.add('blur-background');
+            document.querySelector('.setup-section').classList.add('blur-background');
+            document.querySelector('.winner-popup').style.display = 'block';
+            document.querySelector('.winner-avatar').src = winnerAvatar;
+            document.querySelector('.winner-message').textContent = `${winnerName} Wins!`;
+        }
+
+        function playAgain() {
+            document.querySelector('.game-container').classList.remove('blur-background');
+            document.querySelector('.setup-section').classList.remove('blur-background');
+            document.querySelector('.winner-popup').style.display = 'none';
+            document.querySelector('.setup-section').style.display = 'block';
+            document.querySelector('.game-container').style.display = 'none';
+            players.forEach(player => {
+                player.scoreElement.textContent = '0';
+                player.rollsElement.textContent = 'Rolls Left: 5';
+                player.diceResultElement.src = 'dice1.png';
+            });
+            currentPlayer = 0;
+            rollsRemaining = [5, 5, 5];
+            scores = [0, 0, 0];
+        }
+    </script>
+</body>
+
+</html>
